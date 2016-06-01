@@ -41,17 +41,13 @@ class NodeSearcher extends AbstractElasticaSearcher
 
     /**
      * @param mixed  $query
-     * @param string $lang
      * @param string $type
      *
      * @return mixed|void
      */
-    public function defineSearch($query, $lang, $type)
+    public function defineSearch($query, $type)
     {
         $query = \Elastica\Util::escapeTerm($query);
-
-        $elasticaQueryLang = new \Elastica\Query\Term();
-        $elasticaQueryLang->setTerm('lang', $lang);
 
         $elasticaQueryString = new \Elastica\Query\Match();
         $elasticaQueryString
@@ -66,7 +62,6 @@ class NodeSearcher extends AbstractElasticaSearcher
 
         $elasticaQueryBool = new \Elastica\Query\BoolQuery();
         $elasticaQueryBool
-            ->addMust($elasticaQueryLang)
             ->addShould($elasticaQueryTitle)
             ->addShould($elasticaQueryString)
             ->setMinimumNumberShouldMatch(1);
