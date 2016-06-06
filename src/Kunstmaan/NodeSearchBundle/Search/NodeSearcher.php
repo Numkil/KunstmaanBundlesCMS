@@ -2,8 +2,10 @@
 
 namespace Kunstmaan\NodeSearchBundle\Search;
 
+use Doctrine\ORM\EntityManager;
 use Kunstmaan\AdminBundle\Entity\BaseUser;
 use Kunstmaan\AdminBundle\Helper\DomainConfigurationInterface;
+use Kunstmaan\NodeSearchBundle\Helper\SearchBoostInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
@@ -24,6 +26,11 @@ class NodeSearcher extends AbstractElasticaSearcher
     private $domainConfiguration;
 
     /**
+     * @var EntityManager
+     */
+    private $em;
+
+    /**
      * @param TokenStorageInterface $tokenStorage
      */
     public function setTokenStorage(TokenStorageInterface $tokenStorage)
@@ -40,6 +47,15 @@ class NodeSearcher extends AbstractElasticaSearcher
     }
 
     /**
+     *
+     * @param EntityManager $em
+     */
+     public function setEntityManager(EntityManager $em)
+     {
+         $this->em = $em;
+     }
+
+    /**
      * @param mixed  $query
      * @param string $type
      *
@@ -51,13 +67,12 @@ class NodeSearcher extends AbstractElasticaSearcher
 
         $elasticaQueryString = new \Elastica\Query\Match();
         $elasticaQueryString
-            ->setFieldQuery('content', $query)
-            ->setFieldMinimumShouldMatch('content', '80%');
+            ->setFieldMinimumShouldMatch('content', '80%')
+            ->setFieldQuery('content', $query);
 
         $elasticaQueryTitle = new \Elastica\Query\QueryString();
         $elasticaQueryTitle
             ->setDefaultField('title')
-            ->setBoost(2.0)
             ->setQuery($query);
 
         $elasticaQueryBool = new \Elastica\Query\BoolQuery();
@@ -81,7 +96,11 @@ class NodeSearcher extends AbstractElasticaSearcher
             $elasticaQueryBool->addMust($elasticaQueryRoot);
         }
 
+        $rescore = new \Elastica\Rescore\Query();
+        $rescore->setRescoreQuery($this->getPageBoosts());
+
         $this->query->setQuery($elasticaQueryBool);
+        $this->query->setRescore($rescore);
         $this->query->setHighlight(
             array(
                 'pre_tags'  => array('<strong>'),
@@ -94,7 +113,6 @@ class NodeSearcher extends AbstractElasticaSearcher
                 )
             )
         );
-
     }
 
     /**
@@ -133,5 +151,45 @@ class NodeSearcher extends AbstractElasticaSearcher
         }
 
         return $roles;
+    }
+
+    /**
+     * Apply PageType specific and Page specific boosts
+     *
+     * @return \Elastica\Query\BoolQuery
+     */
+    protected function getPageBoosts()
+    {
+        $rescoreQueryBool = new \Elastica\Query\BoolQuery();
+
+        //Apply page type boosts
+        $pageClasses = $this->em->getRepository('KunstmaanNodeBundle:Node')->findAllDistinctPageClasses();
+        foreach($pageClasses as $pageClass) {
+            $page = new $pageClass['refEntityName']();
+
+            if($page instanceof SearchBoostInterface) {
+                $elasticaQueryTypeBoost = new \Elastica\Query\QueryString();
+                $elasticaQueryTypeBoost
+                    ->setBoost($page->getSearchBoost())
+                    ->setDefaultField('page_class')
+                    ->setQuery(addslashes($pageClass['refEntityName']));
+
+                $rescoreQueryBool->addShould($elasticaQueryTypeBoost);
+            }
+        }
+
+        //Apply page specific boosts
+        $nodeSearches = $this->em->getRepository('KunstmaanNodeSearchBundle:NodeSearch')->findAll();
+        foreach ($nodeSearches as $nodeSearch) {
+            $elasticaQueryNodeId = new \Elastica\Query\QueryString();
+            $elasticaQueryNodeId
+                ->setBoost($nodeSearch->getBoost())
+                ->setDefaultField('node_id')
+                ->setQuery($nodeSearch->getNode()->getId());
+
+            $rescoreQueryBool->addShould($elasticaQueryNodeId);
+        }
+
+        return $rescoreQueryBool;
     }
 }
