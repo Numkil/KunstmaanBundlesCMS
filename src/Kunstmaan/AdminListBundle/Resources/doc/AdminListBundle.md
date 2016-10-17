@@ -224,7 +224,7 @@ To make your Entities sortable, there's the move up and down action method. (aut
         {
             return parent::doMoveUpAction($this->getAdminListConfigurator(), $id, $request);
         }
-    
+
         /**
          * The move down action
          *
@@ -311,7 +311,7 @@ Add the following lines to your routing.yml.
 YourBundle_documents:
     resource: "@YourBundle/Controller/DocumentAdminController.php"
     type: annotation
-    prefix: /{_locale}/admin/documents
+    prefix: /{_locale}/%admin_prefix%/documents
     requirements:
         _locale: %requiredlocales%
 ```

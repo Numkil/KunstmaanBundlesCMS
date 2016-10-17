@@ -26,6 +26,11 @@ class DomainConfiguration extends BaseDomainConfiguration
     protected $aliases = array();
 
     /**
+     * @var AdminRouteHelper
+     */
+    protected $adminRouteHelper;
+
+    /**
      * @param ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
@@ -40,6 +45,8 @@ class DomainConfiguration extends BaseDomainConfiguration
                 }
             }
         }
+
+        $this->adminRouteHelper = $container->get('kunstmaan_admin.adminroute.helper');
     }
 
     /**
@@ -185,7 +192,7 @@ class DomainConfiguration extends BaseDomainConfiguration
         $request = $this->getMasterRequest();
 
         return !is_null($request) &&
-            $this->isAdminRoute($request->getRequestUri()) &&
+            $this->adminRouteHelper->isAdminRoute($request->getRequestUri()) &&
             $request->hasPreviousSession() &&
             $request->getSession()->has(self::OVERRIDE_HOST);
     }
@@ -200,26 +207,5 @@ class DomainConfiguration extends BaseDomainConfiguration
         }
 
         return null;
-    }
-
-    /**
-     * @param string $url
-     *
-     * @return bool
-     */
-    protected function isAdminRoute($url)
-    {
-        preg_match(
-            '/^\/(app_(.*)\.php\/)?([a-zA-Z_-]{2,5}\/)?admin\/(.*)/',
-            $url,
-            $matches
-        );
-
-        // Check if path is part of admin area
-        if (count($matches) === 0) {
-            return false;
-        }
-
-        return true;
     }
 }

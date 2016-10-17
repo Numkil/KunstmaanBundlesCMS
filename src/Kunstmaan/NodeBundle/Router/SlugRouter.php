@@ -41,6 +41,9 @@ class SlugRouter implements RouterInterface
     /** @var DomainConfigurationInterface */
     protected $domainConfiguration;
 
+    /** @var string */
+    protected $adminKey;
+
     /**
      * The constructor for this service
      *
@@ -51,6 +54,7 @@ class SlugRouter implements RouterInterface
         $this->container           = $container;
         $this->slugPattern         = "[a-zA-Z0-9\-_\/]*";
         $this->domainConfiguration = $container->get('kunstmaan_admin.domain_configuration');
+        $this->adminKey            = $container->getParameter('admin_prefix');
     }
 
     /**
@@ -192,7 +196,7 @@ class SlugRouter implements RouterInterface
      */
     protected function getPreviewRouteParameters()
     {
-        $previewPath         = '/admin/preview/{url}';
+        $previewPath         = sprintf('/%s/preview/{url}', $this->adminKey);
         $previewDefaults     = array(
             '_controller' => 'KunstmaanNodeBundle:Slug:slug',
             'preview'     => true,
