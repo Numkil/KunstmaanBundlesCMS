@@ -2,11 +2,14 @@
 
 namespace Kunstmaan\AdminBundle\Helper;
 
+use Kunstmaan\NodeBundle\Router\SlugRouter;
+
 /**
  * Class AdminRouteHelper
  */
 class AdminRouteHelper
 {
+    protected static $ADMIN_MATCH_REGEX = '/^\/(app_[a-zA-Z]+\.php\/)?([a-zA-Z_-]{2,5}\/)?%s\/(.*)/';
 
     /**
      * @var string $adminKey
@@ -14,11 +17,18 @@ class AdminRouteHelper
     protected $adminKey;
 
     /**
-     * @param string $adminKey
+     * @var SlugRouter $slugRouter
      */
-    public function __construct($adminKey)
+    protected $slugRouter;
+
+    /**
+     * @param string $adminKey
+     * @param SlugRouter $slugRouter
+     */
+    public function __construct($adminKey, SlugRouter $slugRouter)
     {
         $this->adminKey = $this->normalizeUrlSlice($adminKey);
+        $this->slugRouter = $slugRouter;
     }
 
     /**
@@ -29,14 +39,11 @@ class AdminRouteHelper
      */
     public function isAdminRoute($url)
     {
-        //If the url contains an admin part and a preview part then it is not an admin route
-        preg_match(sprintf('/^(\/app_[a-zA-Z]+\.php)?\/([a-zA-Z_-]{2,5}\/)?%s(\/.*)?\/preview/', $this->adminKey), $url, $matches);
-
-        if (count($matches) > 0) {
+        if ($this->slugRouter->matchesPreviewRoute($url)) {
             return false;
         }
 
-        preg_match(sprintf('/^\/(app_[a-zA-Z]+\.php\/)?([a-zA-Z_-]{2,5}\/)?%s\/(.*)/', $this->adminKey), $url, $matches);
+        preg_match(sprintf(self::$ADMIN_MATCH_REGEX, $this->adminKey), $url, $matches);
 
         // Check if path is part of admin area
         if (count($matches) === 0) {

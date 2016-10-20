@@ -146,7 +146,7 @@ EOT
         Bundle $bundle,
         $entityClass
     ) {
-        $adminKey = $this->getContainer()->getParameter('admin_prefix');
+        $adminKey = $this->getContainer()->getParameter('kunstmaan_admin.admin_prefix');
         $auto      = true;
         $multilang = false;
         if ($input->isInteractive()) {
@@ -206,7 +206,7 @@ EOT
      * KunstmaanTestBundle_TestEntity:
      * resource: "@KunstmaanTestBundle/Controller/TestEntityAdminListController.php"
      * type:     annotation
-     * prefix:   /{_locale}/%admin_prefix%/testentity/
+     * prefix:   /{_locale}/%kunstmaan_admin.admin_prefix%/testentity/
      * requirements:
      * _locale: %requiredlocales%
      */

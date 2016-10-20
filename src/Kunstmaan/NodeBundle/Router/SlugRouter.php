@@ -23,6 +23,10 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class SlugRouter implements RouterInterface
 {
+
+    protected static $SLUG = "_slug";
+    protected static $SLUG_PREVIEW = "_slug_preview";
+
     /** @var RequestContext */
     protected $context;
 
@@ -54,7 +58,7 @@ class SlugRouter implements RouterInterface
         $this->container           = $container;
         $this->slugPattern         = "[a-zA-Z0-9\-_\/]*";
         $this->domainConfiguration = $container->get('kunstmaan_admin.domain_configuration');
-        $this->adminKey            = $container->getParameter('admin_prefix');
+        $this->adminKey            = $container->getParameter('kunstmaan_admin.admin_prefix');
     }
 
     /**
@@ -177,7 +181,7 @@ class SlugRouter implements RouterInterface
     protected function addPreviewRoute()
     {
         $routeParameters = $this->getPreviewRouteParameters();
-        $this->addRoute('_slug_preview', $routeParameters);
+        $this->addRoute(self::$SLUG_PREVIEW, $routeParameters);
     }
 
     /**
@@ -186,7 +190,7 @@ class SlugRouter implements RouterInterface
     protected function addSlugRoute()
     {
         $routeParameters = $this->getSlugRouteParameters();
-        $this->addRoute('_slug', $routeParameters);
+        $this->addRoute(self::$SLUG, $routeParameters);
     }
 
     /**
@@ -362,5 +366,29 @@ class SlugRouter implements RouterInterface
         }
 
         return join('|', $escapedLocales);
+    }
+
+    /**
+     * Tries to match a given route, if able to match it will return true if it was matched from
+     * "slug_preview". All other cases it will return false
+     *
+     * @param string $url
+     *
+     * @return boolean
+     */
+    public function matchesPreviewRoute($url)
+    {
+        $result = false;
+
+        try {
+            $match = $this->match($url);
+            if (array_key_exists('_route', $match)) {
+                if ($match['_route'] === self::$SLUG_PREVIEW) {
+                    $result = true;
+                }
+            }
+        } finally {
+            return $result;
+        }
     }
 }
