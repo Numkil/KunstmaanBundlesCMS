@@ -24,8 +24,8 @@ use Symfony\Component\Routing\RouterInterface;
 class SlugRouter implements RouterInterface
 {
 
-    protected static $SLUG = "_slug";
-    protected static $SLUG_PREVIEW = "_slug_preview";
+    public static $SLUG = "_slug";
+    public static $SLUG_PREVIEW = "_slug_preview";
 
     /** @var RequestContext */
     protected $context;
@@ -366,29 +366,5 @@ class SlugRouter implements RouterInterface
         }
 
         return join('|', $escapedLocales);
-    }
-
-    /**
-     * Tries to match a given route, if able to match it will return true if it was matched from
-     * "slug_preview". All other cases it will return false
-     *
-     * @param string $url
-     *
-     * @return boolean
-     */
-    public function matchesPreviewRoute($url)
-    {
-        $result = false;
-
-        try {
-            $match = $this->match($url);
-            if (array_key_exists('_route', $match)) {
-                if ($match['_route'] === self::$SLUG_PREVIEW) {
-                    $result = true;
-                }
-            }
-        } finally {
-            return $result;
-        }
     }
 }

@@ -3,6 +3,8 @@
 namespace Kunstmaan\AdminBundle\Helper;
 
 use Kunstmaan\NodeBundle\Router\SlugRouter;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Class AdminRouteHelper
@@ -17,18 +19,18 @@ class AdminRouteHelper
     protected $adminKey;
 
     /**
-     * @var SlugRouter $slugRouter
+     * @var Request $request
      */
-    protected $slugRouter;
+    protected $request;
 
     /**
      * @param string $adminKey
-     * @param SlugRouter $slugRouter
+     * @param RequestStack $requestStack
      */
-    public function __construct($adminKey, SlugRouter $slugRouter)
+    public function __construct($adminKey, RequestStack $requestStack)
     {
-        $this->adminKey = $this->normalizeUrlSlice($adminKey);
-        $this->slugRouter = $slugRouter;
+        $this->adminKey = $adminKey;
+        $this->request = $requestStack->getCurrentRequest();
     }
 
     /**
@@ -39,7 +41,7 @@ class AdminRouteHelper
      */
     public function isAdminRoute($url)
     {
-        if ($this->slugRouter->matchesPreviewRoute($url)) {
+        if ($this->matchesPreviewRoute($url)) {
             return false;
         }
 
@@ -54,21 +56,17 @@ class AdminRouteHelper
     }
 
     /**
-     * @param string $urlSlice
+     * Tries to match a given route, if able to match it will return true if it was matched from
+     * "slug_preview". All other cases it will return false
      *
-     * @return string
+     * @param string $url
+     *
+     * @return boolean
      */
-    protected function normalizeUrlSlice($urlSlice)
+    public function matchesPreviewRoute($url)
     {
-        /* Get rid of exotic characters that would break the url */
-        $urlSlice = filter_var($urlSlice, FILTER_SANITIZE_URL);
+        $routeName = $this->request->get('_route');
 
-        /* Remove leading and trailing slashes */
-        $urlSlice = trim($urlSlice, '/');
-
-        /* Make sure our $urlSlice is literally used in our regex */
-        $urlSlice = preg_quote($urlSlice);
-
-        return $urlSlice;
+        return $routeName == SlugRouter::$SLUG_PREVIEW;
     }
 }

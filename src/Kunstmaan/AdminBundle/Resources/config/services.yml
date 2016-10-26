@@ -104,7 +104,7 @@ services:
 
     kunstmaan_admin.adminroute.helper:
         class: '%kunstmaan_admin.adminroute.helper.class%'
-        arguments: ['%kunstmaan_admin.admin_prefix%', '@kunstmaan_node.slugrouter']
+        arguments: ['%kunstmaan_admin.admin_prefix%', '@request_stack']
 
     kunstmaan_admin.clone.listener:
         class: '%kunstmaan_admin.clone.listener.class%'
