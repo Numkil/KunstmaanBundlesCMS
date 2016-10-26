@@ -152,29 +152,19 @@ class HostOverrideListenerTest extends \PHPUnit_Framework_TestCase
         $translator->method('trans')
             ->willReturnArgument(0);
 
+        $adminRouteReturnValueMap = array(
+            array('/nl/admin/preview/some-uri', false),
+            array('/nl/some-uri', false),
+            array('/nl/admin/some-admin-uri', true)
+        );
+
         $adminRouteHelper = $this->getMockBuilder('Kunstmaan\AdminBundle\Helper\AdminRouteHelper')
             ->disableOriginalConstructor()
             ->getMock();
         $adminRouteHelper
             ->expects($this->any())
             ->method('isAdminRoute')
-            ->with('http://domain.tld/nl/admin/some-admin-uri')
-            ->willReturn(true);
-        $adminRouteHelper
-            ->expects($this->any())
-            ->method('isAdminRoute')
-            ->with('http://domain.tld/nl/admin/preview/some-uri')
-            ->willReturn(false);
-        $adminRouteHelper
-            ->expects($this->any())
-            ->method('isAdminRoute')
-            ->with('http://domain.tld/nl/some-uri')
-            ->willReturn(false);
-        $adminRouteHelper
-            ->expects($this->any())
-            ->method('isAdminRoute')
-            ->with('http://domain.tld/nl/admin/some-admin-uri')
-            ->willReturn(false);
+            ->will($this->returnValueMap($adminRouteReturnValueMap));
 
         $listener = new HostOverrideListener($session, $translator, $domainConfiguration, $adminRouteHelper);
 

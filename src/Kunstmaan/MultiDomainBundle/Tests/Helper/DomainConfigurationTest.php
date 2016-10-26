@@ -319,12 +319,18 @@ class DomainConfigurationTest extends \PHPUnit_Framework_TestCase
 
     private function getAdminRouteHelper()
     {
+        $adminRouteReturnValueMap = array(
+            array('/frontend-uri', false),
+            array('/nl/admin/backend-uri', true)
+        );
+
         $adminRouteHelper = $this->getMockBuilder('Kunstmaan\AdminBundle\Helper\AdminRouteHelper')
             ->disableOriginalConstructor()
             ->getMock();
         $adminRouteHelper
+            ->expects($this->any())
             ->method('isAdminRoute')
-            ->willReturn(true);
+            ->will($this->returnValueMap($adminRouteReturnValueMap));
 
         return $adminRouteHelper;
     }
