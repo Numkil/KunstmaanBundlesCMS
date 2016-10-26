@@ -116,21 +116,6 @@ class SlugRouterTest extends \PHPUnit_Framework_TestCase
         $object->match('/en/some-uri');
     }
 
-    /**
-     * @covers Kunstmaan\NodeBundle\Router\SlugRouter::matchesPreviewRoute
-     */
-    public function testMatchesPreviewRoute()
-    {
-        $request   = $this->getRequest();
-        $nodeTranslation = new NodeTranslation();
-        $container = $this->getContainer($request, true, $nodeTranslation);
-        $object    = new SlugRouter($container);
-        $resultNonPreviewRoute    = $object->matchesPreviewRoute('/en/some-uri');
-        $resultPreviewRoute    = $object->matchesPreviewRoute('/en/admin/preview/some-uri');
-        $this->assertFalse($resultNonPreviewRoute);
-        $this->assertTrue($resultPreviewRoute);
-    }
-
     private function getContainer($request, $multiLanguage = false, $nodeTranslation = null)
     {
         $container    = $this->getMock('Symfony\Component\DependencyInjection\ContainerInterface');

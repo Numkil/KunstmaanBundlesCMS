@@ -34,7 +34,8 @@ class AdminRouteHelper
     }
 
     /**
-     * Checks wether the given url poins to an admin route
+     * Checks wether the given url points to an admin route
+     *
      * @param string $url
      *
      * @return bool
@@ -56,14 +57,13 @@ class AdminRouteHelper
     }
 
     /**
-     * Tries to match a given route, if able to match it will return true if it was matched from
-     * "slug_preview". All other cases it will return false
+     * Checks the current request if it's route is equal to SlugRouter::$SLUG_PREVIEW
      *
      * @param string $url
      *
      * @return boolean
      */
-    public function matchesPreviewRoute($url)
+    protected function matchesPreviewRoute($url)
     {
         $routeName = $this->request->get('_route');
 
