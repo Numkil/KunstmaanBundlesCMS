@@ -19,6 +19,7 @@ settings:
     roles_placeholder: Kies de permissiegroepen...
     add: Gebruiker toevoegen
     edit: Gebruiker bewerken
+    api_key: API key
   roles: Rollen
   role:
     role: Rol
