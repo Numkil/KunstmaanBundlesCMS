@@ -24,6 +24,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *       @SWG\Schema(
  *           @SWG\Property(property="keyword",type="string"),
  *           @SWG\Property(property="text",type="string"),
+ *           @SWG\Property(property="domain", type="string"),
  *       )
  *   }
  * )
@@ -42,23 +43,19 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @SWG\Definition(
  *   definition="putTranslation",
  *   type="object",
- *   @SWG\Items(
- *      allOf={
- *          @SWG\Schema(
- *              required={"keyword", "text", "locale", "domain"},
- *              @SWG\Property(property="keyword",type="string"),
- *              @SWG\Property(property="text",type="string"),
- *              @SWG\Property(property="locale",type="string"),
- *              @SWG\Property(property="domain",type="string", example="messages"),
- *          )
- *      }
- *   )
+ *   allOf={
+ *       @SWG\Schema(
+ *           @SWG\Property(property="keyword",type="string"),
+ *           @SWG\Property(property="text",type="string"),
+ *           @SWG\Property(property="domain", type="string"),
+ *       )
+ *   }
  * )
  * @SWG\Definition(
  *   definition="postTranslation",
  *   type="object",
  *   allOf={
- *       @SWG\Schema(ref="#/definitions/putTranslation"),
+ *      @SWG\Schema(ref="#/definitions/putTranslation"),
  *   }
  * )
  * @SWG\Definition(
@@ -114,6 +111,7 @@ class TranslationsController extends FOSRestController
      * )
      *
      * @Rest\QueryParam(name="locale", nullable=false, description="locale")
+     * @Rest\QueryParam(name="domain", nullable=false, description="domain")
      * @Rest\Get("/public/translations")
      *
      * @param ParamFetcherInterface $paramFetcher
@@ -134,6 +132,13 @@ class TranslationsController extends FOSRestController
      *         description="the locale of the languages you want",
      *         required=true,
      *     ),
+     *     @SWG\Parameter(
+     *         name="domain",
+     *         in="query",
+     *         type="string",
+     *         description="the domain of the languages you want",
+     *         required=false,
+     *     ),
      *     @SWG\Response(
      *         response=200,
      *         description="Returned when successful",
@@ -151,13 +156,14 @@ class TranslationsController extends FOSRestController
     public function getTranslationsAction(ParamFetcherInterface $paramFetcher)
     {
         $locale = $paramFetcher->get('locale');
+        $domain = $paramFetcher->get('domain');
 
         if (!$locale) {
             throw new NotFoundHttpException('locale is required');
         }
 
         $translations = $this->getDoctrine()->getRepository('KunstmaanTranslatorBundle:Translation')
-            ->findAllNotDisabled($locale);
+            ->findAllNotDisabled($locale, $domain);
 
         return $translations;
     }
@@ -168,6 +174,7 @@ class TranslationsController extends FOSRestController
      * )
      *
      * @Rest\QueryParam(name="locale", nullable=false, description="locale")
+     * @Rest\QueryParam(name="domain", nullable=false, description="domain")
      * @Rest\Get("/public/translations/{keyword}")
      *
      * @param string                $keyword
@@ -196,6 +203,13 @@ class TranslationsController extends FOSRestController
      *         description="the keyword of the translation you want",
      *         required=true,
      *     ),
+     *     @SWG\Parameter(
+     *         name="domain",
+     *         in="query",
+     *         type="string",
+     *         description="the domain of the languages you want",
+     *         required=true,
+     *     ),
      *     @SWG\Response(
      *         response=200,
      *         description="Returned when successful",
@@ -213,15 +227,19 @@ class TranslationsController extends FOSRestController
     public function getTranslationAction($keyword, ParamFetcherInterface $paramFetcher)
     {
         $locale = $paramFetcher->get('locale');
+        $domain = $paramFetcher->get('domain');
 
         if (!$locale) {
             throw new NotFoundHttpException('locale is required');
+        }
+        if (!$domain) {
+            throw new NotFoundHttpException('domain is required');
         }
 
         /** @var Translation $translation */
         $translation = $this->getDoctrine()
             ->getRepository(Translation::class)
-            ->findOneBy(['locale' => $locale, 'keyword' => $keyword]);
+            ->findOneBy(['locale' => $locale, 'keyword' => $keyword, 'domain' => $domain]);
 
         if ($translation && !$translation->isDisabled()) {
             return $translation;

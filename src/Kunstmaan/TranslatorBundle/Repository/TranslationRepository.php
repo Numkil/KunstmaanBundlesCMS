@@ -30,9 +30,10 @@ class TranslationRepository extends AbstractTranslatorRepository
     /**
      * Get an array of all non disabled translations
      * @param string $locale
+     * @param string $domain
      * @return array
      */
-    public function findAllNotDisabled($locale)
+    public function findAllNotDisabled($locale, $domain = null)
     {
 
         $qb = $this->createQueryBuilder('t');
@@ -40,11 +41,13 @@ class TranslationRepository extends AbstractTranslatorRepository
             ->where('t.locale = :locale')
             ->andWhere('t.status is null OR t.status != :statusstring')
             ->setParameter('statusstring', Translation::STATUS_DISABLED)
-            ->setParameter('locale', $locale)
-            ->getQuery()
-            ->getResult();
+            ->setParameter('locale', $locale);
+        if (!\is_null($domain)) {
+            $qb->andWhere('t.domain = :tdomain')
+                ->setParameter('tdomain', $domain);
+        }
 
-        return $result;
+        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -200,7 +203,7 @@ EOQ;
 
     /**
      * @param TranslationModel $translationModel
-     * @param $translationId
+     * @param                  $translationId
      */
     public function updateTranslations(TranslationModel $translationModel, $translationId)
     {
