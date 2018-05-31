@@ -42,7 +42,7 @@ class TranslationRepository extends AbstractTranslatorRepository
             ->andWhere('t.status is null OR t.status != :statusstring')
             ->setParameter('statusstring', Translation::STATUS_DISABLED)
             ->setParameter('locale', $locale);
-        if (!\is_null($domain)) {
+        if (!\is_null($domain) && !empty($domain)) {
             $qb->andWhere('t.domain = :tdomain')
                 ->setParameter('tdomain', $domain);
         }
