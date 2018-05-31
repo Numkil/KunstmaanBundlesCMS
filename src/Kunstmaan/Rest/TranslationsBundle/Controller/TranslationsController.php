@@ -12,6 +12,7 @@ use Kunstmaan\Rest\TranslationsBundle\Service\TranslationService;
 use Kunstmaan\TranslatorBundle\Entity\Translation;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -34,7 +35,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *   @SWG\Items(
  *      allOf={
  *          @SWG\Schema(
- *              @SWG\Items(ref="#/definitions/singleTranslation")
+ *              ref="#/definitions/singleTranslation"
  *          )
  *      }
  *   )
@@ -47,6 +48,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *       @SWG\Schema(
  *           @SWG\Property(property="keyword",type="string"),
  *           @SWG\Property(property="text",type="string"),
+ *           @SWG\Property(property="locale",type="string"),
  *           @SWG\Property(property="domain", type="string"),
  *       )
  *   }
@@ -64,7 +66,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *   @SWG\Items(
  *      allOf={
  *          @SWG\Schema(
- *              @SWG\Items(ref="#/definitions/postTranslation")
+ *              ref="#/definitions/postTranslation"
  *          )
  *      }
  *   )
@@ -75,7 +77,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *   @SWG\Items(
  *      allOf={
  *          @SWG\Schema(
- *              @SWG\Items(ref="#/definitions/deprecateKeyword")
+ *              ref="#/definitions/deprecateKeyword"
  *          )
  *      }
  *   )
@@ -86,8 +88,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *   type="object",
  *   allOf={
  *       @SWG\Schema(
- *           required={"keyword"},
- *           @SWG\Property(property="keyword",type="string", example="keyword")
+ *           required={"keyword", "domain"},
+ *           @SWG\Property(property="keyword",type="string", example="keyword"),
+ *           @SWG\Property(property="domain", type="string", example="messages"),
  *       )
  *   }
  * )
@@ -270,7 +273,6 @@ class TranslationsController extends FOSRestController
      *         name="translation",
      *         in="body",
      *         required=true,
-     *         type="single",
      *         description="The posted translations",
      *         @SWG\Schema(ref="#/definitions/postTranslations"),
      *     ),
@@ -317,7 +319,7 @@ class TranslationsController extends FOSRestController
 
     /**
      * @View(
-     *     statusCode=200
+     *     statusCode=201
      * )
      *
      * @Rest\Put("/translations/deprecate")
@@ -332,7 +334,6 @@ class TranslationsController extends FOSRestController
      *         name="deprecatedTranslation",
      *         in="body",
      *         required=true,
-     *         type="single",
      *         description="The posted translations",
      *         @SWG\Schema(ref="#/definitions/keywordCollection"),
      *     ),
@@ -371,13 +372,13 @@ class TranslationsController extends FOSRestController
         }
 
         foreach ($keywords as $keyword) {
-            $translationCreator->deprecateTranslations($keyword['keyword']);
+            $translationCreator->deprecateTranslations($keyword['keyword'], $keyword['domain']);
         }
     }
 
     /**
      * @View(
-     *     statusCode=200
+     *     statusCode=201
      * )
      *
      * @Rest\Put("/translations/disable")
@@ -392,7 +393,6 @@ class TranslationsController extends FOSRestController
      *         name="disabledTranslation",
      *         in="body",
      *         required=true,
-     *         type="single",
      *         description="The posted translations",
      *         @SWG\Schema(ref="#/definitions/disablingDate"),
      *     ),
@@ -488,7 +488,7 @@ class TranslationsController extends FOSRestController
         }
 
         foreach ($keywords as $keyword) {
-            $translationCreator->enableDeprecatedTranslations($keyword['keyword']);
+            $translationCreator->enableDeprecatedTranslations($keyword['keyword'], $keyword['domain']);
         }
     }
 }

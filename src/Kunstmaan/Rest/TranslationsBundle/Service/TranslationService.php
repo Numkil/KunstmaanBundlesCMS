@@ -90,14 +90,15 @@ class TranslationService
 
     /**
      * @param string   $keyword
+     * @param string   $domain
      * @param DateTime $date
      */
-    public function deprecateTranslations($keyword)
+    public function deprecateTranslations($keyword, $domain)
     {
         /** @var TranslationRepository $repository */
         $repository = $this->manager->getRepository(Translation::class);
 
-        $translations = $repository->findBy(['keyword' => $keyword]);
+        $translations = $repository->findBy(['keyword' => $keyword, 'domain' => $domain]);
 
         /** @var Translation $translation */
         foreach ($translations as $translation) {
@@ -127,13 +128,14 @@ class TranslationService
 
     /**
      * @param string $keyword
+     * @param string $domain
      */
-    public function enableDeprecatedTranslations($keyword)
+    public function enableDeprecatedTranslations($keyword, $domain)
     {
         /** @var TranslationRepository $repository */
         $repository = $this->manager->getRepository(Translation::class);
 
-        $translations = $repository->findBy(['keyword' => $keyword]);
+        $translations = $repository->findBy(['keyword' => $keyword, 'domain' => $domain]);
 
         /** @var Translation $translation */
         foreach ($translations as $translation) {
