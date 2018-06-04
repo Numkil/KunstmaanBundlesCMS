@@ -87,9 +87,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *   type="object",
  *   allOf={
  *       @SWG\Schema(
- *           required={"keyword", "domain"},
+ *           required={"keyword"},
  *           @SWG\Property(property="keyword",type="string", example="keyword"),
- *           @SWG\Property(property="domain", type="string", example="messages"),
  *       )
  *   }
  * )
@@ -330,7 +329,7 @@ class TranslationsController extends FOSRestController
      * @Rest\Put("/translations/deprecate/{domain}")
      *
      * @SWG\Put(
-     *     path="/api/translations/deprecate",
+     *     path="/api/translations/deprecate/{domain}",
      *     description="deprecate translations by keyword",
      *     operationId="deprecateTranslation",
      *     produces={"application/json"},
@@ -452,7 +451,7 @@ class TranslationsController extends FOSRestController
      * @Rest\Put("/translations/enable/{domain}")
      *
      * @SWG\Put(
-     *     path="/api/translations/enable",
+     *     path="/api/translations/enable/{domain}",
      *     description="re-enable translations by keyword",
      *     operationId="enableTranslation",
      *     produces={"application/json"},
