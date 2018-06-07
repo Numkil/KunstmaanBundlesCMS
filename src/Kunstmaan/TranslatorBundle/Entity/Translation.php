@@ -62,7 +62,7 @@ class Translation
      *
      * @ORM\column(type="string", length=10, nullable=true)
      */
-    protected $status;
+    protected $status = self::STATUS_ENABLED;
 
     /**
      * Location where the translation comes from
@@ -327,7 +327,7 @@ class Translation
     /**
      * @return string
      */
-    public function getStatus(): string
+    public function getStatus()
     {
         return $this->status;
     }

@@ -62,10 +62,11 @@ class TranslationService
 
     /**
      * @param Translation $translation
+     * @param bool $force
      *
      * @return null|object
      */
-    public function createOrUpdateTranslation(Translation $translation)
+    public function createOrUpdateTranslation(Translation $translation, bool $force = false)
     {
         /** @var TranslationRepository $repository */
         $repository = $this->manager->getRepository(Translation::class);
@@ -77,10 +78,18 @@ class TranslationService
         /** @var \Kunstmaan\TranslatorBundle\Entity\Translation $oldTrans */
         $oldTrans = array_key_exists(0, $result) ? $result[0] : null;
 
-        if ($oldTrans) {
-            $repository->updateTranslations($translation->getTranslationModel($oldTrans->getId()), $oldTrans->getId());
+        if($force) {
+            if ($oldTrans) {
+                $repository->updateTranslations($translation->getTranslationModel($oldTrans->getId()), $oldTrans->getId());
+            } else {
+                $repository->createTranslations($translation->getTranslationModel());
+            }
         } else {
-            $repository->createTranslations($translation->getTranslationModel());
+            if ($oldTrans) {
+                return $oldTrans;
+            } else {
+                $repository->createTranslations($translation->getTranslationModel());
+            }
         }
 
         $this->manager->flush();

@@ -112,7 +112,6 @@ class TranslationsController extends FOSRestController
      * )
      *
      * @Rest\QueryParam(name="locale", nullable=false, description="locale")
-     * @Rest\QueryParam(name="domain", nullable=false, description="domain")
      * @Rest\Get("/public/translations")
      *
      * @param ParamFetcherInterface $paramFetcher
@@ -133,9 +132,63 @@ class TranslationsController extends FOSRestController
      *         description="the locale of the languages you want",
      *         required=true,
      *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="Returned when successful",
+     *         @SWG\Schema(ref="#/definitions/listTranslation")
+     *     ),
+     *     @SWG\Response(
+     *         response="default",
+     *         description="unexpected error",
+     *         @SWG\Schema(
+     *             ref="#/definitions/ErrorModel"
+     *         )
+     *     )
+     * )
+     */
+    public function getTranslationsAction(ParamFetcherInterface $paramFetcher)
+    {
+        $locale = $paramFetcher->get('locale');
+
+        if (!$locale) {
+            throw new NotFoundHttpException('locale is required');
+        }
+
+        $translations = $this->getDoctrine()->getRepository('KunstmaanTranslatorBundle:Translation')
+            ->findAllNotDisabled($locale, null);
+
+        return $translations;
+    }
+
+    /**
+     * @View(
+     *     statusCode=200
+     * )
+     *
+     * @Rest\QueryParam(name="locale", nullable=false, description="locale")
+     * @Rest\Get("/public/translations/{domain}/")
+     *
+     * @param ParamFetcherInterface $paramFetcher
+     *
+     * @return array
+     *
+     *
+     * * @SWG\Get(
+     *     path="/api/public/translations/{domain}",
+     *     description="Get a list of all translations by domain only",
+     *     operationId="getTranslationsByDomain",
+     *     produces={"application/json"},
+     *     tags={"translations"},
+     *     @SWG\Parameter(
+     *         name="locale",
+     *         in="query",
+     *         type="string",
+     *         description="the locale of the languages you want",
+     *         required=true,
+     *     ),
      *     @SWG\Parameter(
      *         name="domain",
-     *         in="query",
+     *         in="path",
      *         type="string",
      *         description="the domain of the languages you want",
      *         required=false,
@@ -154,10 +207,9 @@ class TranslationsController extends FOSRestController
      *     )
      * )
      */
-    public function getTranslationsAction(ParamFetcherInterface $paramFetcher)
+    public function getTranslationsByDomainAction(ParamFetcherInterface $paramFetcher, $domain)
     {
         $locale = $paramFetcher->get('locale');
-        $domain = $paramFetcher->get('domain');
 
         if (!$locale) {
             throw new NotFoundHttpException('locale is required');
@@ -249,6 +301,7 @@ class TranslationsController extends FOSRestController
      *     statusCode=200
      * )
      *
+     * @Rest\QueryParam(name="force", nullable=false, description="Force=true will overwrite existing translations, otherwise will be skipped")
      * @Rest\Post("/translations/{domain}")
      *
      * @param Request $request
@@ -283,6 +336,13 @@ class TranslationsController extends FOSRestController
      *         description="the domain of the languages you want",
      *         required=true,
      *     ),
+     *     @SWG\Parameter(
+     *         name="force",
+     *         in="query",
+     *         type="boolean",
+     *         description="Force=true will overwrite existing translations, otherwise will be skipped",
+     *         required=true,
+     *     ),
      *     @SWG\Response(
      *         response=201,
      *         description="Returned when successfully created",
@@ -302,8 +362,10 @@ class TranslationsController extends FOSRestController
      *     )
      * )
      */
-    public function postTranslationsAction(Request $request, $domain = 'messages')
+    public function postTranslationsAction(Request $request, ParamFetcherInterface $paramFetcher, $domain = 'messages')
     {
+        $force = $paramFetcher->get('force') === "true" ? true : false ;
+
         /** @var TranslationService $translationCreator */
         $translationCreator = $this->get(TranslationService::class);
         $json = $request->getContent();
@@ -313,12 +375,13 @@ class TranslationsController extends FOSRestController
             $translations[$key]['domain'] = $domain;
         }
 
+        $output = [];
         $translations = $translationCreator->createCollectionFromArray($translations);
         foreach ($translations as $translation) {
-            $translationCreator->createOrUpdateTranslation($translation);
+            $output[] = $translationCreator->createOrUpdateTranslation($translation, $force);
         }
 
-        return $translations;
+        return $output;
     }
 
     /**
