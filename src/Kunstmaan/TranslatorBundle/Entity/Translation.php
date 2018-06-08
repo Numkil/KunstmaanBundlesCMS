@@ -347,8 +347,15 @@ class Translation
      */
     public function isDisabled()
     {
-        $status = $this->getStatus();
-        return $status == self::STATUS_DISABLED;
+        return $this->getStatus() === self::STATUS_DISABLED;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isDeprecated()
+    {
+        return $this->getStatus() === self::STATUS_DEPRECATED ? true : null;
     }
 
     /**

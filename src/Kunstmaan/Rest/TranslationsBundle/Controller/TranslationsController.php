@@ -455,10 +455,10 @@ class TranslationsController extends FOSRestController
      *     statusCode=201
      * )
      *
-     * @Rest\Put("/translations/disable")
+     * @Rest\Put("/translations/disable/{domain}")
      *
      * @SWG\Put(
-     *     path="/api/translations/disable",
+     *     path="/api/translations/disable/{domain}",
      *     description="disable translations by keyword",
      *     operationId="disableTranslation",
      *     produces={"application/json"},
@@ -469,6 +469,13 @@ class TranslationsController extends FOSRestController
      *         required=true,
      *         description="The posted translations",
      *         @SWG\Schema(ref="#/definitions/disablingDate"),
+     *     ),
+     *     @SWG\Parameter(
+     *         name="domain",
+     *         in="path",
+     *         type="string",
+     *         description="the domain of the languages you want",
+     *         required=true,
      *     ),
      *     @SWG\Parameter(
      *         name="X-KUMA-API-KEY",
@@ -490,7 +497,7 @@ class TranslationsController extends FOSRestController
      *     )
      * )
      */
-    public function disableDeprecatedTranslationsAction(Request $request)
+    public function disableDeprecatedTranslationsAction(Request $request, $domain)
     {
         /** @var TranslationService $translationCreator */
         $translationCreator = $this->get(TranslationService::class);
@@ -502,7 +509,7 @@ class TranslationsController extends FOSRestController
             throw new TranslationException(TranslationException::NOT_VALID);
         }
 
-        $translationCreator->disableDeprecatedTranslations(new DateTime($translationDeprecation['date']));
+        $translationCreator->disableDeprecatedTranslations(new DateTime($translationDeprecation['date']), $domain);
     }
 
     /**

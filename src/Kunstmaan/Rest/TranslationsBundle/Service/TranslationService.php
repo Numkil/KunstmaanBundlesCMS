@@ -81,12 +81,20 @@ class TranslationService
         if($force) {
             if ($oldTrans) {
                 $repository->updateTranslations($translation->getTranslationModel($oldTrans->getId()), $oldTrans->getId());
+                if($oldTrans->isDeprecated()) {
+                    $oldTrans->setStatus(Translation::STATUS_ENABLED);
+                }
             } else {
                 $repository->createTranslations($translation->getTranslationModel());
             }
         } else {
             if ($oldTrans) {
-                return $oldTrans;
+                if($oldTrans->isDisabled()) {
+                    $oldTrans->setStatus(Translation::STATUS_ENABLED);
+                    $repository->updateTranslations($translation->getTranslationModel($oldTrans->getId()), $oldTrans->getId());
+                } else {
+                    return $oldTrans;
+                }
             } else {
                 $repository->createTranslations($translation->getTranslationModel());
             }
@@ -119,13 +127,14 @@ class TranslationService
 
     /**
      * @param DateTime $date
+     * @param string $domain
      */
-    public function disableDeprecatedTranslations(DateTime $date)
+    public function disableDeprecatedTranslations(DateTime $date, $domain)
     {
         /** @var TranslationRepository $repository */
         $repository = $this->manager->getRepository(Translation::class);
 
-        $translations = $repository->findDeprecatedTranslationsBeforeDate($date);
+        $translations = $repository->findDeprecatedTranslationsBeforeDate($date, $domain);
 
         /** @var Translation $translation */
         foreach ($translations as $translation) {

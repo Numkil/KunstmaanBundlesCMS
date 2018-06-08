@@ -274,15 +274,18 @@ EOQ;
 
     /**
      * @param DateTime $date
+     * @param string $domain
      * @return mixed
      */
-    public function findDeprecatedTranslationsBeforeDate(DateTime $date)
+    public function findDeprecatedTranslationsBeforeDate(DateTime $date, string $domain)
     {
         $qb = $this->createQueryBuilder('t');
         $result = $qb->select('t')
             ->where('t.status = :status')
+            ->andWhere('t.domain = :domain')
             ->andWhere('t.updatedAt < :date')
             ->setParameter('status', Translation::STATUS_DEPRECATED)
+            ->setParameter('domain', $domain)
             ->setParameter('date', $date)
             ->getQuery()
             ->getResult();
