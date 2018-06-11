@@ -111,7 +111,9 @@ EOQ;
         $qb = $em->createQueryBuilder();
         $qb
             ->select('t')
-            ->from('KunstmaanTranslatorBundle:Translation', 't');
+            ->from('KunstmaanTranslatorBundle:Translation', 't')
+            ->andWhere('t.status is null OR t.status != :statusstring')
+            ->setParameter('statusstring', Translation::STATUS_DISABLED);
 
         if (count($locales) > 0) {
             $qb->andWhere($qb->expr()->in('t.locale', $locales));
