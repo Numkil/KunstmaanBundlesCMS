@@ -42,6 +42,7 @@ class TagAdminListController extends AdminListController
      * @Route("/add", name="kunstmaantaggingbundle_admin_tag_add")
      * @Method({"GET", "POST"})
      * @Template("KunstmaanAdminListBundle:Default:add.html.twig")
+     *
      * @return array
      */
     public function addAction(Request $request)
@@ -71,7 +72,7 @@ class TagAdminListController extends AdminListController
 
     /**
      * @Route("/autocomplete.{_format}", name="kunstmaantaggingbundle_admin_tag_autocomplete", defaults={"_format" = "json"})
-     * @Template()
+     * @Template("@KunstmaanTagging/Tags/autocomplete.json.twig")
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
      *

@@ -15,9 +15,10 @@ class SettingsController extends BaseSettingsController
      * Index page for the settings
      *
      * @Route("/", name="KunstmaanAdminBundle_settings")
-     * @Template()
+     * @Template("@KunstmaanAdmin/Settings/index.html.twig")
      *
      * @throws AccessDeniedException
+     *
      * @return array
      */
     public function indexAction()
@@ -34,6 +35,7 @@ class SettingsController extends BaseSettingsController
      * @Template("KunstmaanAdminBundle:Settings:bundleVersion.html.twig")
      *
      * @throws AccessDeniedException
+     *
      * @return array
      */
     public function bundleVersionAction()
@@ -46,6 +48,7 @@ class SettingsController extends BaseSettingsController
         }
 
         $data = null;
+
         try {
             $data = $versionChecker->check();
         } catch (\Exception $e) {
@@ -56,7 +59,7 @@ class SettingsController extends BaseSettingsController
         }
 
         return array(
-            'data' => $data
+            'data' => $data,
         );
     }
 }

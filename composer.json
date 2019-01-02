@@ -61,13 +61,14 @@
         "behat/mink-goutte-driver": "dev-master",
         "behat/mink-sahi-driver": "dev-master",
         "symfony/phpunit-bridge": "~3.0",
-        "phpunit/phpunit": "^5.3.27",
+        "phpunit/phpunit": "^5.7",
         "fzaninotto/faker": "~1.6",
         "nelmio/alice": "^2.1.4",
         "matthiasnoback/symfony-config-test": "2.2.0",
         "matthiasnoback/symfony-dependency-injection-test": "1.2.0",
         "ekino/newrelic-bundle": "^1.4",
-        "codeception/codeception": "^2.4"
+        "codeception/codeception": "^2.4",
+        "friendsofphp/php-cs-fixer": "^2.13"
     },
     "replace": {
         "kunstmaan/admin-bundle": "self.version",
